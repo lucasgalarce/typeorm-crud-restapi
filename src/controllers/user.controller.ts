@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
-import { User } from "../entity/User";
-
+import userService from "../services/user.service";
 interface UserBody {
   firstname: string;
   lastname: string;
@@ -9,7 +8,7 @@ interface UserBody {
 const userController = {
   async getUsers(req: Request, res: Response) {
     try {
-      const users = await User.find();
+      const users = await userService.getUsers();
       return res.json(users);
     } catch (error) {
       if (error instanceof Error) {
@@ -21,10 +20,7 @@ const userController = {
   async getUserById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const user = await User.findOneBy({ id: parseInt(id) });
-
-      if (!user) return res.status(404).json({ message: "User not found" });
-
+      const user = await userService.getUserById(parseInt(id));
       return res.json(user);
     } catch (error) {
       if (error instanceof Error) {
@@ -35,10 +31,7 @@ const userController = {
 
   async createUser(req: Request<unknown, unknown, UserBody>, res: Response) {
     const { firstname, lastname } = req.body;
-    const user = new User();
-    user.firstname = firstname;
-    user.lastname = lastname;
-    await user.save();
+    const user = await userService.createUser(firstname, lastname);
     return res.json(user);
   },
 
@@ -46,10 +39,7 @@ const userController = {
     const { id } = req.params;
 
     try {
-      const user = await User.findOneBy({ id: parseInt(id) });
-      if (!user) return res.status(404).json({ message: "Not user found" });
-
-      await User.update({ id: parseInt(id) }, req.body);
+      await userService.updateUser(parseInt(id), req.body);
 
       return res.sendStatus(204);
     } catch (error) {
@@ -61,11 +51,9 @@ const userController = {
 
   async deleteUser(req: Request, res: Response) {
     const { id } = req.params;
-    try {
-      const result = await User.delete({ id: parseInt(id) });
 
-      if (result.affected === 0)
-        return res.status(404).json({ message: "User not found" });
+    try {
+      await userService.deleteUser(parseInt(id));
 
       return res.sendStatus(204);
     } catch (error) {
