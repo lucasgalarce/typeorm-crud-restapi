@@ -1,13 +1,16 @@
+import { FindManyOptions } from "typeorm";
+import bcrypt from "bcrypt";
+
 import { User } from "../entities/User";
 
 const userService = {
   async getUsers() {
-    // const options: FindManyOptions = {
-    //   order: {
-    //     id: "ASC",
-    //   },
-    // };
-    return User.find();
+    const options: FindManyOptions = {
+      order: {
+        id: "ASC",
+      },
+    };
+    return User.find(options);
   },
 
   async getUserById(id: number) {
@@ -16,10 +19,18 @@ const userService = {
     return user;
   },
 
-  async createUser(firstname: string, lastname: string) {
+  async getUserByName(name: string) {
+    return User.findOneBy({ firstname: name });
+  },
+
+  async createUser(firstname: string, lastname: string, password: string) {
     const user = new User();
+    const hashedPass = await bcrypt.hash(password, 10);
+
     user.firstname = firstname;
     user.lastname = lastname;
+    user.password = hashedPass;
+
     return user.save();
   },
 

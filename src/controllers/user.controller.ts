@@ -3,6 +3,7 @@ import userService from "../services/user.service";
 interface UserBody {
   firstname: string;
   lastname: string;
+  password: string;
 }
 
 const userController = {
@@ -30,9 +31,9 @@ const userController = {
   },
 
   async createUser(req: Request<unknown, unknown, UserBody>, res: Response) {
-    const { firstname, lastname } = req.body;
-    const user = await userService.createUser(firstname, lastname);
-    return res.json(user);
+    const { firstname, lastname, password } = req.body;
+    await userService.createUser(firstname, lastname, password);
+    return res.status(204).send();
   },
 
   async updateUser(req: Request, res: Response) {
